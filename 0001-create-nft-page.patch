@@ -1,0 +1,201 @@
+From bc7b736aeee591964bca0ae911037e9da24ac400 Mon Sep 17 00:00:00 2001
+From: sumana10 <sumanaonlyme@gmail.com>
+Date: Tue, 5 Dec 2023 23:18:12 +0530
+Subject: [PATCH] create nft page
+
+---
+ components/CreatorCard.jsx |   2 +-
+ components/Input.jsx       |  32 +++++++++++
+ components/index.js        |   4 +-
+ pages/create-nft.js        | 110 +++++++++++++++++++++++++++++++++++--
+ 4 files changed, 140 insertions(+), 8 deletions(-)
+ create mode 100644 components/Input.jsx
+
+diff --git a/components/CreatorCard.jsx b/components/CreatorCard.jsx
+index 31296a5..50052da 100644
+--- a/components/CreatorCard.jsx
++++ b/components/CreatorCard.jsx
+@@ -32,7 +32,7 @@ const CreatorCard = ({rank, creatorImage, creatorName, creatorEths}) => {
+        </div>
+        <div className='mt-3 minlg:mt-7 text-center flexCenter flex-col'>
+          <p className='font-poppins dark:text-white text-nft-black-1  font-semibold text-base' suppressHydrationWarning>{creatorName}</p>
+-         <p className='font-poppins dark:text-white text-nft-black-1  font-semibold text-base'>{creatorEths.toFixed(2)}<span className='font-normal'>
++         <p className='font-poppins dark:text-white text-nft-black-1  font-semibold text-base' suppressHydrationWarning>{creatorEths.toFixed(2)}<span className='font-normal'>
+            ETH
+           </span>
+         </p> 
+diff --git a/components/Input.jsx b/components/Input.jsx
+new file mode 100644
+index 0000000..8b3ef8a
+--- /dev/null
++++ b/components/Input.jsx
+@@ -0,0 +1,32 @@
++import React from 'react'
++
++const Input = ({ inputType, title, placeholder, handleClick }) => (
++  <div className="mt-10 w-full">
++    <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-xl">
++      {title}
++    </p>
++    {inputType === 'number' ? (
++        <div className="dark:bg-nft-black-1 bg-white border dark:border-nft-black-1 border-nft-gray-2 rounded-lg w-full outline-none font-poppins dark:text-white text-nft-gray-2 text-base mt-4 px-4 py-3 flexBetween flex-row">
++          <input
++            type="number"
++            className="flex-1 w-full dark:bg-nft-black-1 bg-white outline-none "
++            placeholder={placeholder}
++            onChange={handleClick}
++          />
++          <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-xl">{}</p>
++        </div>
++      )
++        : inputType === 'textarea' ? (
++          <textarea rows={10} className="dark:bg-nft-black-1 bg-white border dark:border-nft-black-1 border-nft-gray-2 rounded-lg w-full outline-none font-poppins dark:text-white text-nft-gray-2 text-base mt-4 px-4 py-3" placeholder={placeholder} onChange={handleClick} />
++        )
++          : (
++            <input
++              className="dark:bg-nft-black-1 bg-white border dark:border-nft-black-1 border-nft-gray-2 rounded-lg w-full outline-none font-poppins dark:text-white text-nft-gray-2 text-base mt-4 px-4 py-3"
++              placeholder={placeholder}
++              onChange={handleClick}
++            />
++          )}
++  </div>
++);
++
++export default Input;
+diff --git a/components/index.js b/components/index.js
+index 9eedf54..a7b929c 100644
+--- a/components/index.js
++++ b/components/index.js
+@@ -4,5 +4,5 @@ import Button from "./Button";
+ import Banner from "./Banner";
+ import CreatorCard from "./CreatorCard";
+ import NFTCard from "./NFTCard";
+-
+-export {Navbar, Footer, Button, Banner, CreatorCard, NFTCard};
+\ No newline at end of file
++import Input from "./Input";
++export {Navbar, Footer, Button, Banner, CreatorCard, NFTCard, Input};
+\ No newline at end of file
+diff --git a/pages/create-nft.js b/pages/create-nft.js
+index f515dd3..4e3f296 100644
+--- a/pages/create-nft.js
++++ b/pages/create-nft.js
+@@ -1,9 +1,109 @@
+-import React from 'react'
++import React, { useState, useMemo, useCallback, useContext } from 'react';
++import { useRouter } from 'next/router';
++import { useDropzone } from 'react-dropzone';
++import Image from 'next/image';
++import { useTheme } from 'next-themes';
++import { Button } from '../components';
++import images from '../assets';
++import { Input } from '../components';
+ 
+ const CreateNFT = () => {
++  // Add your component logic here
++  const [fileUrl, setFileUrl] = useState(null);
++  const theme = useTheme();
++
++  const onDrop = useCallback((acceptedFiles) => {
++    // upload image to the ipfs or perform other actions
++  });
++
++  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
++    onDrop,
++    accept: 'image/*',
++    maxSize: 5000000,
++  });
++
++  // add tailwind classes acording to the file status
++  const fileStyle = useMemo(
++    () => (
++      `dark:bg-nft-black-1 bg-white border dark:border-white border-nft-gray-2 flex flex-col items-center p-5 rounded-sm border-dashed  
++       ${isDragActive ? ' border-file-active ' : ''} 
++       ${isDragAccept ? ' border-file-accept ' : ''} 
++       ${isDragReject ? ' border-file-reject ' : ''}`),
++    [isDragActive, isDragReject, isDragAccept],
++  );
++
++  const [formInput, updateFormInput] = useState({ price: '', name: '', description: '' });
++
++  console.log(formInput)
+   return (
+-    <div>CreateNFT</div>
+-  )
+-}
++    <div className="flex justify-center sm:px-4 p-12">
++      <div className="w-3/5 md:w-full">
++        <h1 className="font-poppins dark:text-white text-nft-black-1 font-semibold text-2xl">Create new item</h1>
++
++        <div className="mt-16">
++          <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-xl">Upload file</p>
++          <div className="mt-4">
++            <div {...getRootProps()} className={fileStyle}>
++              <input {...getInputProps()} />
++              <div className="flexCenter flex-col text-center">
++                <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-xl">JPG, PNG, GIF, SVG, WEBM, MP3, MP4. Max 100mb.</p>
++
++                <div className="my-12 w-full flex justify-center">
++                  <Image
++                    src={images.upload}
++                    width={100}
++                    height={100}
++                    objectFit="contain"
++                    alt="file upload"
++                    className={theme === 'light' ? 'filter invert' : undefined}
++                  />
++                </div>
++
++                <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-sm">Drag and Drop File</p>
++                <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-sm mt-2">Or browse media on your device</p>
++              </div>
++            </div>
++            {fileUrl && (
++              <aside>
++                <div>
++                  <img
++                    src={fileUrl}
++                    alt="Asset_file"
++                  />
++                </div>
++              </aside>
++            )}
++          </div>
++        </div>
++        <Input
++          inputType="input"
++          title="Name"
++          placeholder="Asset Name"
++          handleClick={(e) => updateFormInput({ ...formInput, name: e.target.value })}
++        />
++         <Input
++          inputType="textarea"
++          title="Description"
++          placeholder="NFT Description"
++          handleClick={(e) => updateFormInput({ ...formInput, name: e.target.value })}
++        />
++         <Input
++          inputType="number"
++          title="Price"
++          placeholder="NFT Price"
++          handleClick={(e) => updateFormInput({ ...formInput, name: e.target.value })}
++        />
++         <div className="mt-7 w-full flex justify-end">
++          <Button
++            btnName="Create Item"
++            btnType="primary"
++            classStyles="rounded-xl"
++            handleClick={()=>{}}
++          />
++        </div>
++      </div>
++    </div>
++  );
++};
+ 
+-export default CreateNFT
+\ No newline at end of file
++export default CreateNFT;
+-- 
+2.39.3 (Apple Git-145)
+
